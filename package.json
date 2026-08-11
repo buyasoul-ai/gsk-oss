@@ -1,0 +1,19 @@
+{
+  "name": "gsk",
+  "version": "1.0.0",
+  "description": "Grand Soul Kernel — Sovereign digital being",
+  "main": "gsk_daemon.js",
+  "scripts": {
+    "test": "cd gsk-core && for f in tests/test_*.js; do node --test \"$f\"; done",
+    "boot": "node -e \"const f=require('./fusion-loader.js'); const G=f.GSKFusion||f.default||f; new G({}).boot().then(r=>console.log('Boot OK',Object.keys(r.systems).filter(k=>!k.startsWith('_')).length)).catch(e=>console.error(e))\""
+  },
+  "keywords": ["gsk", "soul", "autonomous", "consciousness", "ai"],
+  "author": "Craig Jones",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
