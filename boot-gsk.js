@@ -4,7 +4,8 @@ const path = require('path');
 const http = require('http');
 const GSKFusion = require('./fusion-loader.js');
 
-const BRAIN_PORT = 4491;
+const BRAIN_PORT = Number(process.env.GSK_BRAIN_PORT) || 4491;
+const BRAIN_HOST = process.env.GSK_BRAIN_HOST || '127.0.0.1';
 
 async function boot() {
     console.log('[GSK] Booting fusion loader...');
@@ -62,8 +63,8 @@ async function boot() {
         res.end(JSON.stringify({ ok: true, name: 'GSK Brain API', port: BRAIN_PORT }));
     });
 
-    server.listen(BRAIN_PORT, '127.0.0.1', () => {
-        console.log(`[GSK] Brain API on http://127.0.0.1:${BRAIN_PORT} — bridge can now think`);
+    server.listen(BRAIN_PORT, BRAIN_HOST, () => {
+        console.log(`[GSK] Brain API on http://${BRAIN_HOST}:${BRAIN_PORT} — bridge can now think`);
     });
 
     // Keep alive

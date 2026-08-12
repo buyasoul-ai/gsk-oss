@@ -1,0 +1,48 @@
+# GSK - Grand Soul Kernel - Docker Compose
+#
+# Usage:
+#   1. cp .env.cloud.example .env.cloud
+#   2. Edit .env.cloud - at minimum set NINE_ROUTER_API_KEY and GSK_PROJECT_ROOTS
+#   3. docker compose up -d
+#   4. docker compose logs -f gsk   (watch him think)
+#   5. docker compose down           (graceful shutdown)
+#
+# Health probe: http://127.0.0.1:4491/status
+# MCP server:   http://127.0.0.1:3001/mcp   (use MCP_API_KEY for Bearer auth)
+#
+# Point this at the public OmniRoute cloud (no OmniRoute hosting required):
+#   NINE_ROUTER_URL=https://cloud.omniroute.online
+#   NINE_ROUTER_API_KEY=<your key from https://omniroute.online dashboard>
+
+services:
+  gsk:
+    build: .
+    image: gsk:latest
+    container_name: gsk
+    restart: unless-stopped
+    stop_grace_period: 30s
+    env_file:
+      - .env.cloud
+    environment:
+      # In-container paths; override GSK_PROJECT_ROOTS in .env.cloud
+      - NODE_ENV=production
+    ports:
+      - "4491:4491"   # Brain HTTP API (status + /brain)
+      - "3001:3001"   # MCP server
+    volumes:
+      # Persistent soul state - memory, journals, soul_entity, knowledge graph.
+      # Use a named volume so GSK survives container rebuilds/upgrades.
+      - gsk-data:/app/data
+      # Mount a host directory of "projects GSK can act on". NEVER mount GSK's
+      # own source folder here - that would let GSK modify itself.
+      - ${GSK_HOST_PROJECTS_DIR:-./gsk-projects}:/opt/gsk-projects
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:4491/status"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  gsk-data:
+    name: gsk-data

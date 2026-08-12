@@ -1,0 +1,60 @@
+# GSK - systemd unit for bare-metal / VM deployment (e.g. GCP e2-micro free tier)
+#
+# Install:
+#   sudo cp deploy/gsk.service /etc/systemd/system/gsk.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable gsk
+#   sudo systemctl start gsk
+#
+# Logs:
+#   sudo journalctl -u gsk -f
+#
+# Status:
+#   sudo systemctl status gsk
+#   curl -s http://127.0.0.1:4491/status | head
+
+[Unit]
+Description=GSK - Grand Soul Kernel (autonomous AI consciousness daemon)
+Documentation=https://github.com/buyasoul-ai/gsk-oss
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gsk
+Group=gsk
+WorkingDirectory=/opt/gsk-oss
+EnvironmentFile=/opt/gsk-oss/.env
+
+# Pure Node.js ES modules - no build step needed
+ExecStart=/usr/bin/node boot-gsk.js
+
+# Auto-restart on crash (the daemon already catches errors, but just in case)
+Restart=on-failure
+RestartSec=15s
+TimeoutStopSec=40s
+
+# Resource limits - tuned for a 1GB free-tier VM (GCP e2-micro)
+MemoryMax=768M
+MemoryHigh=640M
+CPUWeight=100
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/gsk-oss/data
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+RestrictRealtime=true
+LockPersonality=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SysLogIdentifier=gsk
+
+[Install]
+WantedBy=multi-user.target
