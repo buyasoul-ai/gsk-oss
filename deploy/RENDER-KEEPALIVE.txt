@@ -1,0 +1,23 @@
+# Keep-Alive Cron Helper for Render.com Free Tier
+# Render free web services sleep after 15 min of no inbound HTTP traffic.
+# Run this from a free external cron (cron-job.org, UptimeRobot, GitHub Actions)
+# to ping https://your-gsk-service.onrender.com/status every 10 minutes.
+#
+# cron-job.org setup (free, no card):
+#   1. Sign up at https://cron-job.org  (free, email-only)
+#   2. Click "Create Cronjob"
+#   3. URL:        https://your-gsk-service.onrender.com/status
+#   4. Schedule:   Every 10 minutes (*/10 * * * *)
+#   5. Save. Done.
+#
+# UptimeRobot alternative (50 monitors free):
+#   1. Sign up at https://uptimerobot.com  (free, no card)
+#   2. Add New Monitor -> type HTTP(s)
+#   3. URL:         https://your-gsk-service.onrender.com/status
+#   4. Interval:    5 minutes
+#   5. Save. Done.
+#
+# How it works: each ping counts as inbound traffic, which resets Render's
+# 15-min idle timer. Combined with GSK's own internal heartbeat (the Heart
+# brain thinks every 45 min by default), the service effectively stays
+# awake 24/7 for $0.

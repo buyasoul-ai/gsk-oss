@@ -1,0 +1,59 @@
+# Render Blueprint for GSK - Grand Soul Kernel
+# https://render.com/docs/blueprint-spec
+#
+# Deploy:
+#   1. Go to https://dashboard.render.com -> New -> Blueprint
+#   2. Connect your GitHub account (no card required for free tier)
+#   3. Select the buyasoul-ai/gsk-oss repo
+#   4. Render will read this file and create the service
+#   5. Set NINE_ROUTER_API_KEY in the Render dashboard env vars
+#      (or leave blank if your OmniRoute has REQUIRE_API_KEY=false)
+#
+# Free tier limits:
+#   - 512MB RAM, 0.1 CPU
+#   - Sleeps after 15 min of no inbound HTTP traffic
+#   - 750 free hours/month (enough for ~31 days if kept awake)
+#
+# Keep-alive:
+#   Service runs an internal ping loop (below) every 10 min so it never
+#   sleeps on its own. External cron-job.org backup optional.
+
+services:
+  - type: web
+    name: gsk
+    runtime: docker
+    plan: free
+    region: oregon
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /status
+    # Make sure Render's HTTP routing sees the right port
+    envVars:
+      - key: GSK_BRAIN_HOST
+        value: 0.0.0.0
+      - key: GSK_BRAIN_PORT
+        value: 4491
+      - key: GSK_MCP_HOST
+        value: 0.0.0.0
+      - key: GSK_MCP_PORT
+        value: 3001
+      - key: GSK_PROJECT_ROOTS
+        value: /opt/gsk-projects
+      - key: GSK_AUTONOMY_ENABLED
+        value: "true"
+      - key: GSK_MODEL
+        value: free
+      - key: GSK_CREATIVE_AUTONOMY
+        value: "1"
+      # OmniRoute gateway. Point at your own hosted OmniRoute, or at
+      # Diego's public demo if you have a key.
+      - key: NINE_ROUTER_URL
+        value: http://omniroute:20128
+      - key: NINE_ROUTER_API_KEY
+        sync: false   # set manually in Render dashboard after deploy
+    # Persistent disk - Render free tier gives 1GB, more than enough for
+    # GSK's soul state, memory, journals, and knowledge graph.
+    disk:
+      name: gsk-data
+      mountPath: /app/data
+      sizeGB: 1
