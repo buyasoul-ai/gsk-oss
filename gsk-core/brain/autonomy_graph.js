@@ -118,8 +118,8 @@ class AutonomyGraph {
 
         // After sleep: if energy restored → wake, else stay sleeping
         this.conditionalEdges.set('sleep', (state) => {
-            const energy = state.kernel?.consciousnessLoop?.energy?.level || 1;
-            const threshold = state.kernel?.consciousnessLoop?.energy?.restThreshold || 0.3;
+            const energy = this.kernel?.consciousnessLoop?.energy?.level ?? state.kernelEnergy ?? 1;
+            const threshold = this.kernel?.consciousnessLoop?.energy?.restThreshold ?? 0.3;
             if (energy >= threshold) return 'wake';
             return 'sleep'; // loop until restored
         });
@@ -144,7 +144,7 @@ class AutonomyGraph {
         // ═══════════════════════════════════════════════════════════════
 
         this.phaseHandlers.set('observe', async (state) => {
-            const input = { projectRoot: state.projectRoot };
+            const input = { projectRoot: state.projectRoot, goal: state.goal, taskInput: state.taskInput };
             const observation = await this.beautifulLoop._observe(input);
             return { ...state, observation, phase: 'observe', phaseStartedAt: Date.now() };
         });
@@ -165,7 +165,7 @@ class AutonomyGraph {
         });
 
         this.phaseHandlers.set('decide', async (state) => {
-            const goal = await this.beautifulLoop._decide(state.insights, state.perceived, state.affect);
+            const goal = await this.beautifulLoop._decide(state.insights, state.perceived, state.affect, state.goal);
             return { ...state, goal, phase: 'decide', phaseStartedAt: Date.now() };
         });
 
@@ -239,6 +239,8 @@ class AutonomyGraph {
         let state = {
             cycleId,
             projectRoot: initialState.projectRoot,
+            goal: initialState.goal || null,
+            taskInput: initialState.taskInput || null,
             executionOptions: initialState.executionOptions,
             metadata: initialState.metadata || {},
             checkpoints: [],

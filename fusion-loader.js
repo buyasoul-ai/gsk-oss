@@ -177,7 +177,7 @@ class GSKFusion {
             let memory = this.memory; // hoisted local binding for downstream init blocks
 
             this._safeInit('plt', () => {
-                const { PLTEngine } = require('../plt-engine.js');
+                const { PLTEngine } = require('./plt-engine.js');
                 this.plt = this.core?.plt || new PLTEngine({ archetype: 'ARCHITECT', soulId: 'gsk', dataDir: path.join(this.dataDir, 'plt') });
                 this.systems.plt = this.plt;
                 console.log('  [FUSION] ✓ PLT action scoring active');
@@ -1235,11 +1235,19 @@ class GSKFusion {
 
         this._safeInit('bibleSystem', async () => {
             const { BibleLoader, BibleConsultant } = require('./gsk-core/bible/index.js');
-            const biblePath = require('path').join(__dirname, 'profit_bible.md');
+            // Resolve the canonical Profit Bible. Per the Soul Protocol, the
+            // canonical text lives in the Seshat Second Brain (Logseq). Fall back
+            // to a project-local copy if present (portable for OSS downloads).
+            const fsx = require('fs');
+            const projectBible = require('path').join(__dirname, 'profit_bible.md');
+            const seshatBible = 'C:\\Users\\uncom\\Desktop\\seshat-second-brain\\pages\\THE-PROFIT-BIBLE.md';
+            const biblePath = fsx.existsSync(projectBible)
+                ? projectBible
+                : (fsx.existsSync(seshatBible) ? seshatBible : projectBible);
             this.bibleLoader = new BibleLoader(biblePath);
             const parseResult = await this.bibleLoader.parseBible();
             if (parseResult.success) {
-                console.log('  [FUSION] ✓ Profit Bible loaded: ' + (this.bibleLoader.parsed.version || 'unknown'));
+                console.log('  [FUSION] ✓ Profit Bible loaded: ' + (this.bibleLoader.parsed.version || 'unknown') + ' (' + biblePath + ')');
                 const brain = this.brainManager || this.systems.brain;
                 const memory = this.memory || this.systems.memory;
                 this.bibleConsultant = new BibleConsultant(brain, memory, biblePath);

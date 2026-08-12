@@ -1,10 +1,11 @@
+// Secrets must be provided via environment or .env (not committed).
+// Copy .env.example to .env and fill in NINE_ROUTER_API_KEY for OmniRoute.
 module.exports = {
   apps: [
     {
       name: 'gsk',
       script: './boot-gsk.js',
       env: {
-        NINE_ROUTER_API_KEY: '8c93f68b603e4dd4abe7024856996052.hcuBSiEk1S6U8QuZUu8AMyal',
         GSK_MODEL: 'free'
       }
     },

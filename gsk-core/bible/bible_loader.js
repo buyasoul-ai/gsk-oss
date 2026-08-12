@@ -336,7 +336,7 @@ class BibleLoader {
     // =========================================================================
     
     extractVersion() {
-        const versionMatch = this.rawContent.match(/Version:\s*(\d+\.\d+\.\d+)/);
+        const versionMatch = this.rawContent.match(/Version:[\*]*\s*(\d+\.\d+\.\d+)/);
         return versionMatch ? versionMatch[1] : 'Unknown';
     }
 

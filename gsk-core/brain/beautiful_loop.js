@@ -194,6 +194,17 @@ class BeautifulLoop {
         const analyzer = this.kernel?.systems?.projectAnalyzer || this.kernel?.agents?.autonomousLearning?.projectAnalyzer;
         const projectRoot = input.projectRoot || (process.env.GSK_PROJECT_ROOTS || '').split(';')[0] || this.kernel?.dataDir;
 
+        // A directed task (from A2A/Craig) takes priority as the observation
+        if (input.goal) {
+            return {
+                source: 'directed_task',
+                projectRoot,
+                content: `Directed task from Craig (via A2A): ${input.goal}`,
+                directedGoal: input.goal,
+                taskInput: input.taskInput
+            };
+        }
+
         if (analyzer && projectRoot) {
             const analysis = await analyzer.analyze(projectRoot);
             return {
@@ -303,9 +314,23 @@ class BeautifulLoop {
         return insights;
     }
 
-    async _decide(insights, perceived, affect) {
+    async _decide(insights, perceived, affect, directedGoal = null) {
         const goalEngine = this.kernel?.systems?.goalEngine || this.kernel?.goalEngine;
         if (!goalEngine) return null;
+
+        // Priority 0: Directed task from Craig (A2A) — honor it above all
+        if (directedGoal) {
+            return goalEngine.create(
+                String(directedGoal).substring(0, 160),
+                'directed_task',
+                {
+                    priority: 'high',
+                    source: 'directed_task',
+                    observation: perceived.content,
+                    directed: true
+                }
+            );
+        }
 
         // Priority 1: Research insights with score ≥0.75
         if (insights && insights.length > 0) {
@@ -354,8 +379,8 @@ class BeautifulLoop {
         // Delegate to base SovereignAutonomyLoop for plan + execution
         const result = await this.baseLoop.runCycle({
             goal: goal.title,
-            projectRoot: input.projectRoot || goal.metadata?.projectRoot,
-            observation: { content: goal.metadata?.observation },
+            projectRoot: input.projectRoot || goal.projectRoot || goal.metadata?.projectRoot,
+            observation: { content: goal.observation || goal.metadata?.observation || goal.title },
             executionOptions: input.executionOptions
         });
         return result;

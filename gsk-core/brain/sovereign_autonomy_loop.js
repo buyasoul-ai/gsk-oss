@@ -23,6 +23,7 @@ class SovereignAutonomyLoop {
         this.running = true;
         this.stats.cyclesAttempted++;
         const startedAt = Date.now();
+        let title = ''; // hoisted — referenced in the catch block below (hive evolution)
 
         try {
             const observation = await this.perceive(input);
@@ -44,7 +45,7 @@ class SovereignAutonomyLoop {
             const planningEngine = this.kernel?.systems?.planningEngine || this.kernel?.planningEngine;
             if (!goalEngine || !planningEngine) throw new Error('GoalEngine and PlanningEngine are required');
 
-            const title = String(input.goal || `Act on observed state: ${content}`).substring(0, 160);
+            title = String(input.goal || `Act on observed state: ${content}`).substring(0, 160);
             const goal = goalEngine.create(title, observation.source || 'autonomy_loop', {
                 projectRoot: observation.projectRoot || input.projectRoot || null,
                 observation: content

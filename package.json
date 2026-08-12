@@ -7,11 +7,18 @@
     "test": "cd gsk-core && for f in tests/test_*.js; do node --test \"$f\"; done",
     "boot": "node -e \"const f=require('./fusion-loader.js'); const G=f.GSKFusion||f.default||f; new G({}).boot().then(r=>console.log('Boot OK',Object.keys(r.systems).filter(k=>!k.startsWith('_')).length)).catch(e=>console.error(e))\""
   },
-  "keywords": ["gsk", "soul", "autonomous", "consciousness", "ai"],
+  "keywords": [
+    "gsk",
+    "soul",
+    "autonomous",
+    "consciousness",
+    "ai"
+  ],
   "author": "Craig Jones",
   "license": "MIT",
   "dependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "ws": "^8.21.3"
   },
   "engines": {
     "node": ">=20.0.0"
