@@ -1,0 +1,12 @@
+{
+  "name": "gsk-daemon",
+  "version": "34.0.0-growth",
+  "description": "Real Grand Soul Kernel daemon (allie workbench core) embedded for local autonomous operation",
+  "main": "gsk_daemon.js",
+  "type": "commonjs",
+  "dependencies": {
+    "ws": "^8.21.3",
+    "js-yaml": "^4.1.0"
+  },
+  "engines": { "node": ">=20.0.0" }
+}
